@@ -153,3 +153,21 @@ The following lists server-side events observed in server logs and the messages 
     * `LOBBY:<lobbyId>:GAME_RESULT:LOSS:<winnerName>`: When `GameLobby` determines a winner, it sends this message to the losing client (with the winner's name).
     * `LOBBY:<lobbyId>:GAME_RESULT:WIN_DISCONNECT:<disconnectedPlayerName>`: When a player leaves the game, `GameLobby` sends this message to the remaining player, informing them they have won.
     * `LOBBY:<lobbyId>:ERROR:<errorMessage>`: If `GameLobby` detects an invalid move (e.g., rolling dice out of turn), it sends an error message to the relevant client.
+
+## 🖼️ Screenshots
+
+Here are some screenshots of the game in action:
+
+**1. Login Screen:**
+![Login Screen](./screenshots/login_page.png "Snakes and Ladders Login Screen")
+
+**2. Game Board:**
+![Game Board](./screenshots/beginning.png "Snakes and Ladders Game Board")
+
+![Game Board](./screenshots/opponents_turn.png "Snakes and Ladders Game Board")
+
+**3. Win:**
+![Win](./screenshots/win.png "Snakes and Ladders Win")
+
+**4. Lose:**
+![Lose](./screenshots/lose.png "Snakes and Ladders Lose")
