@@ -7,7 +7,24 @@
     <packaging>jar</packaging>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.release>23</maven.compiler.release>
-        <exec.mainClass>SnakesAndLaddersServer</exec.mainClass>
+        <maven.compiler.release>21</maven.compiler.release>
+        <exec.mainClass>myproject.snakesandladders.server.SnakesAndLaddersServer</exec.mainClass>
     </properties>
+    <build>
+        <plugins>
+            <!-- Maven Jar Plugin -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.3.0</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <mainClass>Server.Server</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>
