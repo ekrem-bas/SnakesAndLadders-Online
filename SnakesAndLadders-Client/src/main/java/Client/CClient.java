@@ -13,11 +13,11 @@ public class CClient {
     private Socket socket;
     private PrintWriter out;
     private BufferedReader in;
-    // arayuzde gerceklestirilecek degisiklikler icin arayuz degiskeni
+    // UI variable for changes to be implemented in the interface
     private ClientGUI gui;
-    // bu client'in bulundugu lobby'nin id'si
+    // The ID of the lobby this client is in
     private int lobbyId = -1;
-    // lobby icindeki player number'i 
+    // Player number within the lobby
     private int playerNumber = -1;
 
     public CClient(String serverAddress, int port, ClientGUI gui) throws IOException {
@@ -28,21 +28,21 @@ public class CClient {
             this.in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             System.out.println("CClient: Connected to server " + serverAddress + ":" + port);
             new Thread(this::listenToServer).start();
-            // client baslar baslamaz server'a ismini gonderiyor.
+            // As soon as the client starts, it sends its name to the server.
             out.println("NAME:" + gui.getPlayerName());
         } catch (IOException e) {
             System.err.println("CClient: Connection to server failed: " + e.getMessage());
-            JOptionPane.showMessageDialog(this.gui, "Sunucuya bağlanılamadı: " + e.getMessage(), "Bağlantı Hatası", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this.gui, "Could not connect to server: " + e.getMessage(), "Connection Error", JOptionPane.ERROR_MESSAGE);
             this.gui.dispose();
             System.exit(0);
             throw e;
         }
     }
 
-    // serveri dinle
+    // listen to the server
     private void listenToServer() {
         try {
-            String serverMessage; // Sunucudan gelen ham mesaj (örn: "LOBBY:1:DICE_ROLLED:5")
+            String serverMessage; // Raw message from the server (e.g., "LOBBY:1:DICE_ROLLED:5")
             while ((serverMessage = in.readLine()) != null) {
                 System.out.println("CClient received from server: " + serverMessage);
                 final String finalMessage = serverMessage;
@@ -50,7 +50,7 @@ public class CClient {
                     String messageContent = finalMessage.substring(6);
                     processLobbyMessage(messageContent);
                 } else if (finalMessage.startsWith("WAIT:")) {
-                    gui.setStatus("Rakip oyuncu araniyor...");
+                    gui.setStatus("Searching for an opponent...");
                 } else {
                     System.out.println("CClient: Received unhandled message type: " + finalMessage);
                     gui.setStatus("Sunucu: " + finalMessage);
@@ -58,14 +58,14 @@ public class CClient {
             }
         } catch (IOException e) {
             System.err.println("CClient: Lost connection to server: " + e.getMessage());
-            JOptionPane.showMessageDialog(gui, "Sunucuyla bağlantı koptu! Lütfen yeniden başlatın.", "Ağ Hatası", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(gui, "Connection to the server was lost! Please restart.", "Network Error", JOptionPane.ERROR_MESSAGE);
             gui.enableRollButton(false);
-            gui.setStatus("Bağlantı kesildi. Lütfen yeniden başlatın.");
+            gui.setStatus("Connection lost. Please restart.");
         } finally {
             close();
             JOptionPane.showMessageDialog(gui,
-                    "Sunucuyla bağlantı koptu veya sunucu kapatıldı.\nUygulama şimdi kapanacak.",
-                    "Bağlantı Hatası",
+                    "Connection to the server was lost or the server was shut down.\nThe application will now close.",
+                    "Connection lost",
                     JOptionPane.ERROR_MESSAGE);
             System.exit(0);
         }
@@ -90,7 +90,7 @@ public class CClient {
             case "LOBBY_JOINED":
                 this.playerNumber = Integer.parseInt(data);
                 gui.setPlayerId(this.playerNumber);
-                gui.setStatus(this.lobbyId + " numaralı lobiye Oyuncu " + this.playerNumber + " olarak katıldınız.");
+                gui.setStatus(this.lobbyId + " to lobby number Player " + this.playerNumber + " you have joined as.");
                 System.out.println("CClient: Successfully joined lobby " + this.lobbyId + " as Player " + this.playerNumber);
                 break;
             case "GAME_START":
@@ -107,10 +107,10 @@ public class CClient {
                 int currentTurnPlayerNumber = Integer.parseInt(turnInfo[0]);
                 String currentTurnPlayerName = turnInfo[1];
                 if (this.playerNumber == currentTurnPlayerNumber) {
-                    gui.setStatus("Sıra Sende, " + currentTurnPlayerName + "!");
+                    gui.setStatus("Your Turn, " + currentTurnPlayerName + "!");
                     gui.enableRollButton(true);
                 } else {
-                    gui.setStatus("Rakibin (" + currentTurnPlayerName + ") Sırası!");
+                    gui.setStatus("Opponent's (" + currentTurnPlayerName + ") Turn!");
                     gui.enableRollButton(false);
                 }
                 break;
@@ -122,16 +122,16 @@ public class CClient {
                 this.handleGameResult(resultType, relevantPlayerName);
                 break;
             case "MY_MOVE_UPDATE":
-                // Data: GosterilecekEskiKonum:GosterilecekYeniKonum
+                // Data: OldPositionToShow:NewPositionToShow
                 String[] moveInfo = data.split(":");
-                int displayOldP = Integer.parseInt(moveInfo[0]);
-                int displayNewP = Integer.parseInt(moveInfo[1]);
-                gui.updateMyMoveInfo(displayOldP, displayNewP);
+                int displayedOldPosition = Integer.parseInt(moveInfo[0]);
+                int displayedNewPosition = Integer.parseInt(moveInfo[1]);
+                gui.updateMyMoveInfo(displayedOldPosition, displayedNewPosition);
                 break;
             case "DICE_ROLLED":
-                // Data: AtılanZarDegeri
-                int diceRolledValue = Integer.parseInt(data);
-                gui.updateDiceImage(diceRolledValue);
+                // Data: RolledDiceValue
+                int rolledDiceValue = Integer.parseInt(data);
+                gui.updateDiceImage(rolledDiceValue);
                 break;
             default:
                 System.out.println("CClient: Received unknown LOBBY command: " + command + " with payload: " + data);
@@ -149,39 +149,39 @@ public class CClient {
 
     public void handleGameResult(String resultType, String relevantPlayerName) {
         gui.enableRollButton(false);
-        String dialogTitle = "Oyun Bitti";
+        String dialogTitle = "Game Over";
         String dialogMessage;
         String statusMessage = "";
 
         switch (resultType) {
             case "WIN":
-                // 'relevantPlayerName' : kaybeden kisi
-                dialogMessage = "Tebrikler, " + this.gui.getPlayerName() + "! Kazandın!";
-                statusMessage = "KAZANDIN!";
+                // 'relevantPlayerName' : the person who lost / loser
+                dialogMessage = "Congratulations, " + this.gui.getPlayerName() + "! You won!";
+                statusMessage = "YOU WON!";
                 JOptionPane.showMessageDialog(this.gui, dialogMessage, dialogTitle, JOptionPane.INFORMATION_MESSAGE);
                 break;
             case "LOSS":
-                // 'relevantPlayerName' : kazanan kisi
-                dialogMessage = "Üzgünüm, " + this.gui.getPlayerName() + ". Kaybettin.\nKazanan: " + relevantPlayerName + ".";
-                statusMessage = "KAYBETTİN! Kazanan: " + relevantPlayerName;
+                // 'relevantPlayerName' : the person who won / winner
+                dialogMessage = "Sorry, " + this.gui.getPlayerName() + ". You lost.\nWinner: " + relevantPlayerName + ".";
+                statusMessage = "YOU LOST! Winner: " + relevantPlayerName;
                 JOptionPane.showMessageDialog(this.gui, dialogMessage, dialogTitle, JOptionPane.WARNING_MESSAGE); // Or INFORMATION_MESSAGE
                 break;
             case "WIN_DISCONNECT":
-                // 'relevantPlayerName' : disconnected olan kisi
-                dialogMessage = relevantPlayerName + " oyundan ayrıldı. Kazandın, " + this.gui.getPlayerName() + "!";
-                statusMessage = "KAZANDIN! (Rakip Ayrıldı)";
+                // 'relevantPlayerName' : the person who disconnected
+                dialogMessage = relevantPlayerName + " left the game. You won, " + this.gui.getPlayerName() + "!";
+                statusMessage = "YOU WON! (Opponent Left)";
                 JOptionPane.showMessageDialog(this.gui, dialogMessage, dialogTitle, JOptionPane.INFORMATION_MESSAGE);
                 break;
         }
         gui.setStatus(statusMessage);
 
-        // kullanici pencereyi kapatmazsa 45 saniye sonra otomatik kapat
+        // if the user doesn't close the window, automatically close after 45 seconds
         int delayInMilliseconds = 45000;
 
         Timer autoCloseTimer = new Timer(delayInMilliseconds, (e) -> {
             JOptionPane.showMessageDialog(this.gui,
-                    "Uygulama 45 saniyedir açık. Bağlantı sonlandırılıyor.",
-                    "Otomatik Kapanış", JOptionPane.INFORMATION_MESSAGE);
+                    "The application has been open for 45 seconds. Terminating connection.",
+                    "Closing Window", JOptionPane.INFORMATION_MESSAGE);
 
             close();
 

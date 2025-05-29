@@ -5,9 +5,9 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /*
-    Singleton LobbyManager sinifi
-    Singleton olmasinin sebebi ise server icin sadece ama sadece bir tane lobby manager olusturulması
- */
+    Singleton LobbyManager class
+    The reason for it being a Singleton is that only one (and only one) lobby manager should be created for the server.
+ */
 public class LobbyManager {
 
     private static LobbyManager instance;

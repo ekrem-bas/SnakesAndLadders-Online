@@ -19,18 +19,18 @@ public class ClientGUI extends javax.swing.JFrame {
 
     public ClientGUI(String playerName) {
         initComponents();
-        setLocationRelativeTo(null); // Pencereyi ortala
+        setLocationRelativeTo(null); // Center the window
         pnl_status.setBorder(new EmptyBorder(10, 10, 10, 20));
         pack();
         SwingUtilities.invokeLater(this::setBackgroundImage);
         this.btn_rollDice.setEnabled(false);
-        this.lbl_turn.setText("Sunucuya bağlanılıyor...");
+        this.lbl_turn.setText("Connecting to server...");
         this.playerName = playerName;
-        this.setTitle("Yılanlar & Merdivenler - " + playerName);
+        this.setTitle("Snakes & Ladders - " + playerName);
         try {
             this.client = new CClient("localhost", 12345, this);
         } catch (IOException e) {
-            setStatus("Çevrimdışı. Sunucuya bağlanılamadı.");
+            setStatus("Offline. Could not connect to server.");
         }
     }
 
@@ -58,7 +58,7 @@ public class ClientGUI extends javax.swing.JFrame {
             URL boardImageUrl = getClass().getResource("/assets/board2.jpg");
             if (boardImageUrl == null) {
                 System.err.println("ClientGUI: CRITICAL - Background image /assets/board2.jpg NOT FOUND in classpath.");
-                lbl_board.setText("Oyun tahtası resmi bulunamadı");
+                lbl_board.setText("Game board image not found");
                 return;
             }
             ImageIcon boardIcon = new ImageIcon(boardImageUrl);
@@ -76,7 +76,7 @@ public class ClientGUI extends javax.swing.JFrame {
         } catch (Exception e) {
             System.err.println("ClientGUI: Exception during setBackgroundImage: " + e.getMessage());
             e.printStackTrace();
-            lbl_board.setText("Tahta resmi yüklenirken hata oluştu");
+            lbl_board.setText("Error loading board image");
         }
     }
 
@@ -96,7 +96,7 @@ public class ClientGUI extends javax.swing.JFrame {
         lbl_board = new javax.swing.JLabel() {
             @Override
             protected void paintComponent(Graphics g) {
-                super.paintComponent(g); // Önce label'in normal çizimini yap
+                super.paintComponent(g); // First, do the normal drawing of the label
                 if (game != null) {
                     game.drawPlayers(g, playerId);
                 }
@@ -148,9 +148,9 @@ public class ClientGUI extends javax.swing.JFrame {
         lbl_turn.setText("Opponents Turn");
         lbl_turn.setAutoscrolls(true);
 
-        jLabel1.setText("Eski Konum: ");
+        jLabel1.setText("Old Position: ");
 
-        jLabel2.setText("Yeni Konum:");
+        jLabel2.setText("New Position:");
 
         javax.swing.GroupLayout pnl_statusLayout = new javax.swing.GroupLayout(pnl_status);
         pnl_status.setLayout(pnl_statusLayout);
@@ -159,12 +159,12 @@ public class ClientGUI extends javax.swing.JFrame {
             .addGroup(pnl_statusLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(pnl_statusLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(lbl_turn, javax.swing.GroupLayout.DEFAULT_SIZE, 374, Short.MAX_VALUE)
+                    .addComponent(lbl_turn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(lbl_dice, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnl_statusLayout.createSequentialGroup()
-                        .addGap(0, 27, Short.MAX_VALUE)
+                        .addGap(0, 0, Short.MAX_VALUE)
                         .addComponent(btn_rollDice, javax.swing.GroupLayout.PREFERRED_SIZE, 321, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 26, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(pnl_statusLayout.createSequentialGroup()
                         .addGroup(pnl_statusLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 85, Short.MAX_VALUE)
@@ -172,9 +172,9 @@ public class ClientGUI extends javax.swing.JFrame {
                         .addGap(18, 18, 18)
                         .addGroup(pnl_statusLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(pnl_statusLayout.createSequentialGroup()
-                                .addComponent(lbl_currentPosition, javax.swing.GroupLayout.DEFAULT_SIZE, 85, Short.MAX_VALUE)
+                                .addComponent(lbl_currentPosition, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addGap(186, 186, 186))
-                            .addComponent(lbl_oldPosition, javax.swing.GroupLayout.DEFAULT_SIZE, 271, Short.MAX_VALUE))))
+                            .addComponent(lbl_oldPosition, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                 .addContainerGap())
         );
         pnl_statusLayout.setVerticalGroup(
@@ -188,7 +188,7 @@ public class ClientGUI extends javax.swing.JFrame {
                 .addGroup(pnl_statusLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(pnl_statusLayout.createSequentialGroup()
                         .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 49, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 100, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 150, Short.MAX_VALUE)
                         .addComponent(lbl_turn, javax.swing.GroupLayout.PREFERRED_SIZE, 83, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(75, 75, 75)
                         .addComponent(lbl_dice, javax.swing.GroupLayout.PREFERRED_SIZE, 256, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -208,14 +208,14 @@ public class ClientGUI extends javax.swing.JFrame {
     public void updateDiceImage(int diceValue) {
         ImageIcon diceIcon = Dice.getDiceIcon(diceValue);
         if (diceIcon != null && diceIcon.getIconWidth() > 0) {
-            // Zar resmini lbl_dice boyutuna göre ölçekle
+            // Scale the dice image according to the lbl_dice size
             int lblWidth = lbl_dice.getWidth() > 0 ? lbl_dice.getWidth() : 100;
             int lblHeight = lbl_dice.getHeight() > 0 ? lbl_dice.getHeight() : 100;
             Image scaledDiceImage = diceIcon.getImage().getScaledInstance(lblWidth, lblHeight, Image.SCALE_SMOOTH);
             lbl_dice.setIcon(new ImageIcon(scaledDiceImage));
         } else {
             lbl_dice.setIcon(null);
-            System.err.println("ClientGUI: Zar resmi (" + diceValue + ") updateDiceImage içinde yüklenemedi veya Dice.getDiceIcon null döndü.");
+            System.err.println("ClientGUI: Dice image (" + diceValue + ") could not be loaded in updateDiceImage or Dice.getDiceIcon returned null.");
         }
     }
 
@@ -231,8 +231,8 @@ public class ClientGUI extends javax.swing.JFrame {
     }
 
     public void clearMyMoveInfo() {
-        lbl_oldPosition.setText("-"); // Başlangıç değeri
-        lbl_currentPosition.setText("-"); // Başlangıç değeri
+        lbl_oldPosition.setText("-"); // Default value
+        lbl_currentPosition.setText("-"); // Default value
     }
     private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
         if (client != null) {

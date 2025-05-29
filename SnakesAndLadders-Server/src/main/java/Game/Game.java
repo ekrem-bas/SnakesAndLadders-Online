@@ -6,19 +6,19 @@ import java.util.Map;
 
 public class Game {
 
-    // oyuncu pozisyonlari
+    // player positions
     private int player1Position = 1;
     private int player2Position = 1;
-    // yilanlarin ve merdivenlerin tutuldugu map
+    // map holding the snakes and ladders
     private final Map<Integer, Integer> snakesAndLadders = new HashMap<>();
 
     public Game() {
-        // oyun baslangicinda merdivenleri ve yilanlari ayarla
+        // set up ladders and snakes at the start of the game
         initializeSnakesAndLadders();
     }
 
     private void initializeSnakesAndLadders() {
-        // Yılanlar (Başlangıç -> Bitiş)
+        // Snakes (Start -> End)
         snakesAndLadders.put(57, 19);
         snakesAndLadders.put(37, 5);
         snakesAndLadders.put(33, 10);
@@ -26,7 +26,7 @@ public class Game {
         snakesAndLadders.put(92, 55);
         snakesAndLadders.put(97, 56);
 
-        // Merdivenler (Başlangıç -> Bitiş)
+        // Ladders (Start -> End)
         snakesAndLadders.put(7, 45);
         snakesAndLadders.put(40, 77);
         snakesAndLadders.put(34, 66);
@@ -35,7 +35,7 @@ public class Game {
         snakesAndLadders.put(63, 81);
     }
 
-    // tahtadaki sayi karelerinin ortasini hesaplama fonksiyonu
+    // function to calculate the center of the number squares on the board
     private int[] getCenterCircles(Graphics g, String text, Point cords) {
         FontMetrics metrics = g.getFontMetrics();
         int textWidth = metrics.stringWidth(text);
@@ -52,7 +52,7 @@ public class Game {
         return coordinates;
     }
 
-    // oyuncular icin daire cizme fonksiyonu
+    // function to draw circles for players
     public void drawPlayers(Graphics g, int currentPlayerId) {
         String p1Text = "";
         String p2Text = "";
@@ -69,28 +69,28 @@ public class Game {
         if (player1Position == player2Position && player1Position >= 1 && player1Position <= 100) {
             Point overlapCoords = getCoordinates(player1Position);
 
-            g.setColor(Color.GRAY); // Gri renk
+            g.setColor(Color.GRAY); // Gray color
             g.fillOval(overlapCoords.x - 24, overlapCoords.y - 24, 48, 48);
 
-            g.setColor(Color.WHITE); // Beyaz metin
+            g.setColor(Color.WHITE); // White text
             g.setFont(new Font("Arial", Font.BOLD, 14));
 
             int[] combinedTextCoords = getCenterCircles(g, combinedText, overlapCoords);
             g.drawString(combinedText, combinedTextCoords[0], combinedTextCoords[1]);
 
         } else {
-            // Oyuncu 1'i çiz
+            // Draw Player 1
             Point p1Coords = getCoordinates(player1Position);
-            g.setColor(new Color(34, 139, 34)); // Orman Yeşili
+            g.setColor(new Color(34, 139, 34)); // Forest Green
             g.fillOval(p1Coords.x - 24, p1Coords.y - 24, 48, 48);
             g.setColor(Color.WHITE);
             g.setFont(new Font("Arial", Font.BOLD, 14));
             int[] p1TextCoords = getCenterCircles(g, p1Text, p1Coords);
             g.drawString(p1Text, p1TextCoords[0], p1TextCoords[1]);
 
-            // Oyuncu 2'yi çiz
+            // Draw Player 2
             Point p2Coords = getCoordinates(player2Position);
-            g.setColor(new Color(0, 0, 139)); // Koyu Mavi
+            g.setColor(new Color(0, 0, 139)); // Dark Blue
             g.fillOval(p2Coords.x - 24, p2Coords.y - 24, 48, 48);
             g.setColor(Color.WHITE);
             g.setFont(new Font("Arial", Font.BOLD, 14));
@@ -99,18 +99,18 @@ public class Game {
         }
     }
 
-    // oyuncularin pozisyonlarini guncelle
+    // update players' positions
     public synchronized void updatePositions(int p1Pos, int p2Pos) {
         this.player1Position = Math.max(1, Math.min(p1Pos, 100));
         this.player2Position = Math.max(1, Math.min(p2Pos, 100));
     }
 
-    // oyuncularin pozisyonlarini al
+    // get players' positions
     public synchronized int[] getPositions() {
         return new int[]{player1Position, player2Position};
     }
 
-    // yilan ve merdiven kontrolu
+    // check snake and ladder
     public synchronized void checkSnakeOrLadder(int playerNumberWhoseTurnItIs) {
         int currentPosition;
 
@@ -137,12 +137,12 @@ public class Game {
 
     public synchronized int getWinner() {
         if (player1Position == 100) {
-            return 1; // Oyun bitti, kazanan 1. oyuncu
+            return 1; // Game over, player 1 wins
         }
         if (player2Position == 100) {
-            return 2; // Oyun bitti, kazanan 2. oyuncu
+            return 2; // Game over, player 2 wins
         }
-        return 0; // Oyun henüz bitmedi
+        return 0; // Game not over yet
     }
 
     private Point getCoordinates(int position) {
@@ -153,8 +153,8 @@ public class Game {
         final int BOARD_PIXEL_WIDTH = 950;
         final int BOARD_PIXEL_HEIGHT = 900;
 
-        int squareWidth = BOARD_PIXEL_WIDTH / NUM_COLS;   
-        int squareHeight = BOARD_PIXEL_HEIGHT / NUM_ROWS; 
+        int squareWidth = BOARD_PIXEL_WIDTH / NUM_COLS;
+        int squareHeight = BOARD_PIXEL_HEIGHT / NUM_ROWS;
 
         int zeroBasedPos = position - 1; // Convert to 0-99
         int row = zeroBasedPos / NUM_COLS; // Row from bottom (0-indexed: 0 for 1-10, 1 for 11-20, ...)

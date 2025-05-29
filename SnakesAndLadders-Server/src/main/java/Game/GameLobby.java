@@ -5,11 +5,11 @@ import java.util.*;
 
 public class GameLobby {
 
-    private final int lobbyId; // lobi id
-    private final List<SClient> clients = new ArrayList<>(); // lobideki clientlar
-    private final Game game; // oyun
-    private int currentPlayerIndex = 0; // sira kontrolu icin gerekli degisken
-    private boolean gameActive = false; // oyunun aktifligi
+    private final int lobbyId; // lobby id
+    private final List<SClient> clients = new ArrayList<>(); // clients in the lobby
+    private final Game game; // game
+    private int currentPlayerIndex = 0; // variable necessary for turn control
+    private boolean gameActive = false; // activity status of the game
 
     public GameLobby(int lobbyId) {
         this.lobbyId = lobbyId;
@@ -49,7 +49,7 @@ public class GameLobby {
             System.out.println("GameLobby " + lobbyId + ": Client " + client.getClientId() + " (Player " + leavingPlayerNumber + ", " + leavingPlayerName + ") removed from lobby list.");
             client.setCurrentLobby(null);
 
-            if (gameActive) { // oyun devam ediyorken
+            if (gameActive) { // while the game is ongoing
 
                 gameActive = false;
                 System.out.println("GameLobby " + lobbyId + ": Game was active. Player " + client.getPlayerNumberInLobby()
@@ -132,58 +132,58 @@ public class GameLobby {
 
         System.out.println("GameLobby " + lobbyId + ": Player " + rollerPlayerNumber + " (Client ID: " + rollerClient.getClientId() + ") rolled " + diceValue + ".");
 
-        // 1. Oyuncunun zarı atmadan önceki gerçek (orijinal) konumunu al
+        // 1. Get the player's actual (original) position before rolling the dice
         int[] positionsBeforeAnyMove = game.getPositions().clone();
         int originalOldPos = positionsBeforeAnyMove[playerGameIndex];
 
-        // 2. Zar atışıyla ham pozisyonu hesapla
+        // 2. Calculate the raw position with the dice roll
         int newPosAfterDice = Math.min(originalOldPos + diceValue, 100);
 
-        // 3. Bu ham pozisyonu Game nesnesinde geçici olarak güncelle (checkSnakeOrLadder öncesi için)
+        // 3. Temporarily update this raw position in the Game object (for before checkSnakeOrLadder)
         int[] tempPositions = positionsBeforeAnyMove.clone();
         tempPositions[playerGameIndex] = newPosAfterDice;
-        game.updatePositions(tempPositions[0], tempPositions[1]); // Game'i bu ham pozisyonla güncelle
+        game.updatePositions(tempPositions[0], tempPositions[1]); // Update the game with this raw position
 
         System.out.println("GameLobby " + lobbyId + ": Player " + rollerPlayerNumber + " moved from " + originalOldPos + " to " + newPosAfterDice + " (before S/L).");
 
-        // 4. Yılan veya Merdiven var mı kontrol et
+        // 4. Check if there is a Snake or Ladder
         game.checkSnakeOrLadder(rollerPlayerNumber);
 
-        // 5. Yılan/merdiven sonrası nihai pozisyonları al
+        // 5. Get the final positions after snake/ladder
         int[] finalPositionsAllPlayers = game.getPositions();
-        int finalActualNewPos = finalPositionsAllPlayers[playerGameIndex]; // Oyuncunun hamlesinin bittiği nihai kare
+        int finalActualNewPos = finalPositionsAllPlayers[playerGameIndex]; // The final square where the player's move ends
 
-        // 6. GUI'de gösterilecek "Eski Konum" ve "Yeni Konum"u belirle
+        // 6. Determine the "Old Position" and "New Position" to be displayed in the GUI
         int displayOldPos;
-        int displayNewPos = finalActualNewPos; // "Yeni Konum" her zaman nihai konumdur.
+        int displayNewPos = finalActualNewPos; // "New Position" is always the final position.
 
-        if (finalActualNewPos != newPosAfterDice) { // Yılan veya merdiven varsa
-            // "Eski Konum" yılanın/merdivenin başladığı yerdir.
-            // newPosAfterDice, oyuncunun yılan/merdivene bastığı kare.
+        if (finalActualNewPos != newPosAfterDice) { // If there is a snake or ladder
+            // "Old Position" is where the snake/ladder starts.
+            // newPosAfterDice is the square where the player landed on the snake/ladder.
             displayOldPos = newPosAfterDice;
-        } else { // Yılan veya merdiven yoksa
-            // "Eski Konum" zar atmadan önceki orijinal konum.
+        } else { // If there is no snake or ladder
+            // "Old Position" is the original position before rolling the dice.
             displayOldPos = originalOldPos;
         }
 
         System.out.println("GameLobby " + lobbyId + ": For display: Player " + rollerPlayerNumber
                 + " OldPos=" + displayOldPos + ", NewPos=" + displayNewPos);
 
-        // 7. Sadece hamleyi yapan istemciye kendi hamle bilgisini gönder
-        // Data: GosterilecekEskiKonum:GosterilecekYeniKonum
+        // 7. Send only the current player their own move information
+        // Data: OldPositionToShow:NewPositionToShow
         String myMoveData = String.format("%d:%d",
                 displayOldPos,
                 displayNewPos
         );
         rollerClient.sendMessage("LOBBY:" + lobbyId + ":MY_MOVE_UPDATE:" + myMoveData);
 
-        // Atılan zar bilgisini tüm istemcilere gönder
+        // Send the rolled dice information to all clients
         broadcast("DICE_ROLLED:" + diceValue);
 
-        // 9. Tüm oyuncuların tahtadaki nihai konumlarını senkronize etmek için genel pozisyon güncellemesi
+        // 9. General position update to synchronize the final positions of all players on the board
         broadcast("POSITION_UPDATE:" + Arrays.toString(finalPositionsAllPlayers));
 
-        // 10. Oyun sonu kontrolü ve sıra değişimi
+        // 10. End game check and turn change
         if (game.getWinner() != 0) {
             int winnerPlayerNumber = game.getWinner();
             SClient winnerClient = null;

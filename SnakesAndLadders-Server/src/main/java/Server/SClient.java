@@ -65,7 +65,7 @@ public class SClient implements Runnable {
         try {
             String inputLine;
             while ((inputLine = in.readLine()) != null) {
-                // SClient baslar baslamaz alacagi ilk mesaj NAME ve NAME'in direkt islenmesi lazim
+                // The first message SClient will receive as soon as it starts is NAME, and NAME needs to be processed directly
                 if (inputLine.startsWith("NAME:")) {
                     String[] parts = inputLine.split(":", 2);
                     this.setPlayerName(parts[1].trim());

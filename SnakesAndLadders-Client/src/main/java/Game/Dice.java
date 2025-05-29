@@ -4,12 +4,12 @@ import javax.swing.ImageIcon;
 
 public class Dice {
     
-    // zar atma fonksiyonu
+    // rolling dice function
     public static int rollDice() {
         return (int) (Math.random() * 6) + 1;
     }
 
-    // zara gore zar resmi getir
+    // get dice image based on the dice number
     public static ImageIcon getDiceIcon(int number) {
         String diceImageName;
         switch (number) {
